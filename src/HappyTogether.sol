@@ -30,22 +30,15 @@ contract HappyTogether {
     // Keep as constants as they should be!
     address constant BRIDE = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4; // FILL YOUR OWN
     address constant GROOM = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2; // FILL YOUR OWN
-
-    // The wedding gift
-    struct Gift {
-        bool sheWants;
-        bool heWants;
-    }
+    address constant HOME = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
 
     // To use forever after
     struct Family {
         address wife;
         address husband;
-        address home;
     }
 
-    // Initiate structs
-    Gift gift;
+    // Initiate struct
     Family family;
 
     // Let everyone know what they've promised
@@ -53,14 +46,14 @@ contract HappyTogether {
     event HePromised(string what);
 
     // Gift unwrapping
-    event GivenGift(string greeting, string from, uint256 amount);
+    event GiftGiven(string greeting, string from, uint256 amount);
     event GiftUnwrapped();
 
     /**
      *  @dev function for sending gifts
      */
     function sendGift(string calldata _greeting, string calldata _from) external payable {
-        emit GivenGift(_greeting, _from, msg.value);
+        emit GiftGiven(_greeting, _from, msg.value);
     }
 
     /**
@@ -68,49 +61,17 @@ contract HappyTogether {
      *  @param _what string is the made promise
      */
     function iPromise(string calldata _what) external payable {
-        if (msg.sender == BRIDE) {
+        if (msg.sender == BRIDE && family.wife != BRIDE) {
             family.wife = BRIDE;
             emit ShePromised(_what);
-        } else if (msg.sender == GROOM) {
+        } else if (msg.sender == GROOM && family.husband != GROOM) {
             family.husband = GROOM;
             emit HePromised(_what);
-        } else {
-            revert();
-        }
-    }
-
-    /**
-     *  @dev function to withdraw the wedding gift
-     *  @param _home address is the account to which the entire balance of the gift should be send to
-     */
-    function brightFuture(address _home) external {
-        if (_home == address(0)) revert();
-
-        if (msg.sender == family.wife) {
-            gift.sheWants = true;
-            handleHome(_home);
         }
 
-        if (msg.sender == family.husband) {
-            gift.heWants = true;
-            handleHome(_home);
-        }
-
-        if (gift.sheWants && gift.heWants) {
-            payable(family.home).transfer(address(this).balance);
+        if (family.wife == BRIDE && family.husband == GROOM) {
+            payable(HOME).transfer(address(this).balance);
             emit GiftUnwrapped();
-        }
-    }
-
-    /**
-     *  @dev internal function for home address handling
-     *  @param _home address to be set or checked
-     */
-    function handleHome(address _home) internal {
-        if (family.home == address(0)) {
-            family.home = _home;
-        } else if (family.home != _home) {
-            revert();
         }
     }
 }

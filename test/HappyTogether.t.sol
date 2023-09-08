@@ -6,9 +6,9 @@ import {HappyTogether} from "../src/HappyTogether.sol";
 
 contract HappyTogetherTest is Test {
     HappyTogether public happyTogether;
-    address constant BRIDE = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4; // FILL YOUR OWN
-    address constant GROOM = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2; // FILL YOUR OWN
-    address immutable HOME = makeAddr("home");
+    address constant BRIDE = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
+    address constant GROOM = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
+    address constant HOME = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
     address immutable uncleBob = makeAddr("uncleBob");
 
     function setUp() public {
@@ -24,36 +24,8 @@ contract HappyTogetherTest is Test {
         vm.startPrank(GROOM);
         happyTogether.iPromise("I do");
 
-        happyTogether.brightFuture(HOME);
-
-        vm.startPrank(BRIDE);
-        happyTogether.brightFuture(HOME);
-
         assertEq(address(happyTogether).balance, 0);
         assertEq(address(HOME).balance, 1 ether);
-    }
-
-    function testWrongHome() public {
-        address wrongHome = makeAddr("wrongHome");
-        vm.startPrank(BRIDE);
-        happyTogether.iPromise("I do");
-        vm.startPrank(GROOM);
-        happyTogether.iPromise("I do");
-
-        happyTogether.brightFuture(HOME);
-
-        vm.startPrank(BRIDE);
-        vm.expectRevert();
-        happyTogether.brightFuture(wrongHome);
-    }
-
-    function testZeroHome() public {
-        vm.startPrank(BRIDE);
-        happyTogether.iPromise("I do");
-        vm.startPrank(GROOM);
-        happyTogether.iPromise("I do");
-        vm.expectRevert();
-        happyTogether.brightFuture(address(0));
     }
 
     function testNonWedding() public {
@@ -61,11 +33,6 @@ contract HappyTogetherTest is Test {
         happyTogether.iPromise("I do");
         vm.startPrank(GROOM);
         happyTogether.iPromise("I do");
-
-        happyTogether.brightFuture(HOME);
-
-        vm.startPrank(BRIDE);
-        happyTogether.brightFuture(HOME);
 
         assertEq(address(happyTogether).balance, 0);
         assertEq(address(HOME).balance, 1 ether);
@@ -75,5 +42,10 @@ contract HappyTogetherTest is Test {
         happyTogether.sendGift{value: 1 ether}("Congratulations!", "Uncle Bob");
 
         assertEq(address(happyTogether).balance, 1 ether);
+
+        happyTogether.iPromise("I do");
+
+        assertEq(address(happyTogether).balance, 0 ether);
+        assertEq(address(HOME).balance, 2 ether);
     }
 }
